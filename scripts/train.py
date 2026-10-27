@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-
+from src.face_recognition.evaluation.verification import evaluate_verification
 import torch
 
 from src.face_recognition.data.dataloader import create_dataloader
@@ -38,6 +38,11 @@ def main():
         batch_size=args.batch_size,
     )
 
+    validation_loader = create_dataloader(
+        split = "validation",
+        batch_size = args.batch_size,
+    )
+
     trainer = FaceRecognitionTrainer(
         learning_rate=args.learning_rate,
     )
@@ -60,8 +65,22 @@ def main():
     print(f"Batch size: {args.batch_size}")
     print(f"Total epochs: {args.epochs}")
 
+    best_auc = float("-inf")
+
     for epoch in range(start_epoch, args.epochs + 1):
         train_loss = trainer.train_one_epoch(dataloader)
+
+        validation_metrics = evaluate_verification(
+            model=trainer.model,
+            dataloader=validation_loader,
+            device=trainer.device,
+        )
+        print(
+            f"Validation ROC-AUC: {validation_metrics['roc_auc']:.4f} | "
+            f"EER: {validation_metrics['eer']:.4f} | "
+            f"Best Accuracy: {validation_metrics['best_accuracy']:.4f}",
+            flush=True,
+        )
 
         print(
             f"Epoch [{epoch}/{args.epochs}] "
@@ -76,6 +95,22 @@ def main():
             epoch=epoch,
             loss=train_loss,
         )
+
+        current_auc = validation_metrics["roc_auc"]
+
+        if current_auc > best_auc:
+            best_auc = current_auc
+
+            trainer.save_checkpoint(
+                path=output_dir / "best_model.pth",
+                epoch = epoch,
+                loss = train_loss,
+            )
+
+            print(
+                f"New best model saved with ROC-AUC: {best_auc:.4f}",
+                flush = True, 
+            )
 
     print("Training completed.")
 
