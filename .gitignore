@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# LFW image dataset
+data/lfw/lfw_home/
+
+# Generated dataset manifests
+data/lfw/manifests/
+
+# YuNet-generated landmark annotations
+data/yunet/annotations/
+
+# Generated outputs
+outputs/
+
+# Trained checkpoints and weights
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Local environment variables
+.env
+.env.*
