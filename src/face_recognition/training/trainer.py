@@ -90,7 +90,7 @@ class FaceRecognitionTrainer:
 
         return total_loss / total_samples
 
-    def save_checkpoint(self, path, epoch, loss):
+    def save_checkpoint(self, path, epoch, loss, best_auc):
         from pathlib import Path
 
         path = Path(path)
@@ -102,6 +102,7 @@ class FaceRecognitionTrainer:
             "arcface_state_dict": self.arcface.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
             "train_loss": loss,
+            "best_auc": best_auc,
         }
 
         torch.save(checkpoint, path)
@@ -135,4 +136,5 @@ class FaceRecognitionTrainer:
         return {
             "epoch": checkpoint["epoch"],
             "train_loss": checkpoint["train_loss"],
+            "best_auc": checkpoint.get("best_auc"),
         }
